@@ -796,6 +796,15 @@ function renderPromptModal(){
 var GITHUB_REPO = 'razvan-builds/trip-planner';
 var GITHUB_TRIPS_PATH = 'trips';
 
+function resolveGithubRepo(){
+  var host = window.location.hostname || '';
+  var pathParts = window.location.pathname.split('/').filter(Boolean);
+  if(/^[a-z0-9-]+\.github\.io$/i.test(host) && pathParts.length){
+    return host.split('.')[0] + '/' + pathParts[0];
+  }
+  return GITHUB_REPO;
+}
+
 function renderImportModal(){
   if(!state.showImport) return '';
   var content = '';
@@ -806,8 +815,8 @@ function renderImportModal(){
   }
   if(state.importTrips && state.importTrips.length){
     content += '<ul class="import-list">';
-    state.importTrips.forEach(function(t){
-      content += '<li class="import-item" onclick="importFromGithub(\''+esc(t.name)+'\')"><span class="import-icon">🌍</span><span class="import-name">'+esc(t.label)+'</span><span class="import-arrow">→</span></li>';
+    state.importTrips.forEach(function(t,idx){
+      content += '<li class="import-item" onclick="importFromGithubByIndex('+idx+')"><span class="import-icon">🌍</span><span class="import-name">'+esc(t.label)+'</span><span class="import-arrow">→</span></li>';
     });
     content += '</ul>';
   } else if(!state.importLoading && !state.importError){
@@ -836,7 +845,8 @@ function closeImportModal(){
 }
 
 function fetchGithubTrips(){
-  var url = 'https://api.github.com/repos/'+GITHUB_REPO+'/contents/'+GITHUB_TRIPS_PATH;
+  var repo = resolveGithubRepo();
+  var url = 'https://api.github.com/repos/'+repo+'/contents/'+GITHUB_TRIPS_PATH;
   fetch(url).then(function(res){
     if(!res.ok) throw new Error('GitHub: '+res.status);
     return res.json();
@@ -846,7 +856,7 @@ function fetchGithubTrips(){
     }).map(function(f){
       var label = f.name.replace(/-planner\.json$/,'').replace(/\.json$/,'').replace(/-/g,' ');
       label = label.charAt(0).toUpperCase() + label.slice(1);
-      return {name:f.name, label:label};
+      return {name:f.name, label:label, downloadUrl:sanitizeHttpUrl(f.download_url)};
     });
     state.importLoading = false;
     state.importError = null;
@@ -859,12 +869,21 @@ function fetchGithubTrips(){
   });
 }
 
-function importFromGithub(fileName){
+function importFromGithubByIndex(idx){
+  var trip = state.importTrips && state.importTrips[idx];
+  if(!trip || !trip.downloadUrl){
+    state.importError = 'Fișier invalid.';
+    render();
+    return;
+  }
+  importFromGithubUrl(trip.downloadUrl);
+}
+
+function importFromGithubUrl(downloadUrl){
   state.importLoading = true;
   state.importError = null;
   render();
-  var url = 'https://raw.githubusercontent.com/'+GITHUB_REPO+'/main/'+GITHUB_TRIPS_PATH+'/'+encodeURIComponent(fileName);
-  fetch(url).then(function(res){
+  fetch(downloadUrl).then(function(res){
     if(!res.ok) throw new Error('Fetch: '+res.status);
     return res.json();
   }).then(function(data){
