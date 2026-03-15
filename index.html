@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Trip Planner</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -146,6 +146,20 @@ body{font-family:'Inter',sans-serif;background:#f5f3f0;color:#2d2d2d;line-height
 .prompt-body pre{white-space:pre-wrap;word-wrap:break-word;font-family:'Inter',monospace;font-size:.8rem;line-height:1.7;color:#333;background:#f8f7f5;padding:20px;border-radius:10px;border:1px solid #e8e6e2}
 .prompt-footer{padding:14px 24px;border-top:1px solid #eee;font-size:.75rem;color:#999;text-align:center;flex-shrink:0}
 
+/* ===== IMPORT MODAL ===== */
+.import-modal{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.import-modal h3{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:16px}
+.import-list{list-style:none;padding:0;margin:0 0 16px}
+.import-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.15s;background:#fafafa}
+.import-item:hover{background:#f0f0f0;border-color:#ccc}
+.import-item .import-icon{font-size:1.2rem;flex-shrink:0}
+.import-item .import-name{flex:1;font-size:.85rem;font-weight:500;color:#333}
+.import-item .import-arrow{color:#aaa;font-size:.85rem}
+.import-loading{text-align:center;padding:20px;color:#999;font-size:.85rem}
+.import-error{text-align:center;padding:12px;color:#c62828;font-size:.8rem;background:#ffebee;border-radius:8px;margin-bottom:12px}
+.import-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#bbb;font-size:.75rem}
+.import-divider::before,.import-divider::after{content:'';flex:1;height:1px;background:#e0e0e0}
+
 /* ===== ATTACHMENT ===== */
 .attachment-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .att-chip{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:#e3f2fd;font-size:.7rem;color:#1565c0}
@@ -207,7 +221,11 @@ function createDefaultState(){
     editingHero: null, // 'name','dates','hotel'
     moveMenu: null, // {dayIdx, spotIdx}
     filter: null, // null = all, 'sight', 'food', 'viewpoint', 'transport'
-    showPrompt: false
+    showPrompt: false,
+    showImport: false,
+    importTrips: null, // null=not loaded, []=loaded list
+    importError: null,
+    importLoading: false
   };
 }
 
@@ -380,7 +398,7 @@ autoLoad();
 // ===== RENDER =====
 function render(){
   var app = document.getElementById('app');
-  app.innerHTML = renderHero() + renderMasterMap() + '<div class="container">' + state.days.map(function(d,di){return renderDay(d,di)}).join('') + '<button class="add-day-btn" onclick="addDay()">+ Adaugă o zi nouă</button></div>' + renderTips() + '<div class="footer">Trip Planner Template — datele se salvează automat în browser</div>' + renderModal() + renderPromptModal();
+  app.innerHTML = renderHero() + renderMasterMap() + '<div class="container">' + state.days.map(function(d,di){return renderDay(d,di)}).join('') + '<button class="add-day-btn" onclick="addDay()">+ Adaugă o zi nouă</button></div>' + renderTips() + '<div class="footer">Trip Planner Template — datele se salvează automat în browser</div>' + renderModal() + renderPromptModal() + renderImportModal();
   initAllMaps();
   autoSave();
   // close menus on outside click
@@ -392,7 +410,7 @@ function renderHero(){
   var nameHtml = h.editingHero==='name'?'<input class="hero-edit" value="'+esc(h.tripName)+'" onblur="saveHero(\'name\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<h1 onclick="editHero(\'name\')">'+esc(h.tripName)+'</h1>';
   var datesHtml = h.editingHero==='dates'?'<input class="hero-edit" value="'+esc(h.dates)+'" onblur="saveHero(\'dates\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<div class="dates" onclick="editHero(\'dates\')">'+esc(h.dates)+'</div>';
   var hotelHtml = h.editingHero==='hotel'?'<input class="hero-edit" value="'+esc(h.hotel.name)+'" onblur="saveHero(\'hotel\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<div class="hotel" onclick="editHero(\'hotel\')">'+esc(h.hotel.name)+'</div>';
-  return '<div class="hero">'+nameHtml+datesHtml+hotelHtml+'<div class="hero-actions"><button class="btn-hero" onclick="exportData()">💾 Export JSON</button><label class="btn-hero">📂 Import JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label><button class="btn-hero" onclick="showJsonHelp()">📋 Prompt AI trip</button><button class="btn-hero" onclick="newTrip()">🆕 Trip nou</button></div></div>';
+  return '<div class="hero">'+nameHtml+datesHtml+hotelHtml+'<div class="hero-actions"><button class="btn-hero" onclick="exportData()">💾 Export JSON</button><button class="btn-hero" onclick="openImportModal()">📂 Import JSON</button><button class="btn-hero" onclick="showJsonHelp()">📋 Prompt AI trip</button><button class="btn-hero" onclick="newTrip()">🆕 Trip nou</button></div></div>';
 }
 
 function renderMasterMap(){
@@ -775,6 +793,92 @@ function renderPromptModal(){
   return '<div class="modal-bg" onclick="closePrompt()"><div class="prompt-modal" onclick="event.stopPropagation()"><div class="prompt-header"><h3>Prompt pentru trip nou</h3><div class="prompt-header-btns"><button id="copy-prompt-btn" class="prompt-copy-btn" onclick="copyPrompt()">📋 Copiază promptul</button><button class="prompt-close-btn" onclick="closePrompt()">✕</button></div></div><div class="prompt-body"><pre>'+esc(getPromptText())+'</pre></div><div class="prompt-footer">Copiază → lipește într-o conversație nouă cu un AI → completează câmpurile [ex: ...] → importă JSON-ul generat</div></div></div>';
 }
 
+var GITHUB_REPO = 'razvan-builds/trip-planner';
+var GITHUB_TRIPS_PATH = 'trips';
+
+function renderImportModal(){
+  if(!state.showImport) return '';
+  var content = '';
+  if(state.importLoading){
+    content = '<div class="import-loading">Se încarcă trip-urile din GitHub...</div>';
+  } else if(state.importError){
+    content = '<div class="import-error">'+esc(state.importError)+'</div>';
+  }
+  if(state.importTrips && state.importTrips.length){
+    content += '<ul class="import-list">';
+    state.importTrips.forEach(function(t){
+      content += '<li class="import-item" onclick="importFromGithub(\''+esc(t.name)+'\')"><span class="import-icon">🌍</span><span class="import-name">'+esc(t.label)+'</span><span class="import-arrow">→</span></li>';
+    });
+    content += '</ul>';
+  } else if(!state.importLoading && !state.importError){
+    content += '<div class="import-loading">Nu s-au găsit trip-uri în GitHub.</div>';
+  }
+  content += '<div class="import-divider">sau</div>';
+  content += '<label class="import-item" style="margin-bottom:0"><span class="import-icon">📁</span><span class="import-name">Alege fișier de pe dispozitiv</span><span class="import-arrow">→</span><input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>';
+  return '<div class="modal-bg" onclick="closeImportModal()"><div class="import-modal" onclick="event.stopPropagation()"><h3>Import trip</h3>'+content+'<div style="text-align:right;margin-top:16px"><button class="modal-btn secondary" onclick="closeImportModal()">Închide</button></div></div></div>';
+}
+
+function openImportModal(){
+  state.showImport = true;
+  state.importTrips = null;
+  state.importError = null;
+  state.importLoading = true;
+  render();
+  fetchGithubTrips();
+}
+
+function closeImportModal(){
+  state.showImport = false;
+  state.importTrips = null;
+  state.importError = null;
+  state.importLoading = false;
+  render();
+}
+
+function fetchGithubTrips(){
+  var url = 'https://api.github.com/repos/'+GITHUB_REPO+'/contents/'+GITHUB_TRIPS_PATH;
+  fetch(url).then(function(res){
+    if(!res.ok) throw new Error('GitHub: '+res.status);
+    return res.json();
+  }).then(function(files){
+    state.importTrips = files.filter(function(f){
+      return f.name.endsWith('.json') && f.type==='file';
+    }).map(function(f){
+      var label = f.name.replace(/-planner\.json$/,'').replace(/\.json$/,'').replace(/-/g,' ');
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      return {name:f.name, label:label};
+    });
+    state.importLoading = false;
+    state.importError = null;
+    render();
+  }).catch(function(err){
+    state.importLoading = false;
+    state.importError = 'Nu s-au putut încărca trip-urile. Verifică conexiunea.';
+    state.importTrips = [];
+    render();
+  });
+}
+
+function importFromGithub(fileName){
+  state.importLoading = true;
+  state.importError = null;
+  render();
+  var url = 'https://raw.githubusercontent.com/'+GITHUB_REPO+'/main/'+GITHUB_TRIPS_PATH+'/'+encodeURIComponent(fileName);
+  fetch(url).then(function(res){
+    if(!res.ok) throw new Error('Fetch: '+res.status);
+    return res.json();
+  }).then(function(data){
+    applyImportedData(data);
+    state.showImport = false;
+    state.importLoading = false;
+    render();
+  }).catch(function(err){
+    state.importLoading = false;
+    state.importError = 'Nu s-a putut descărca fișierul.';
+    render();
+  });
+}
+
 function exportData(){
   var json=JSON.stringify({tripName:state.tripName,dates:state.dates,hotel:state.hotel,transport:state.transport,days:state.days},null,2);
   var blob=new Blob([json],{type:'application/json'});
@@ -789,6 +893,7 @@ function importData(ev){
   reader.onload=function(e){
     try{
       applyImportedData(JSON.parse(e.target.result));
+      state.showImport = false;
       render();
     }catch(err){alert('Fișier JSON invalid.')}
   };
