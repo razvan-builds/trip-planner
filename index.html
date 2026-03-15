@@ -234,8 +234,9 @@ function sanitizeCoordinate(v,min,max){
 function sanitizeHttpUrl(raw){
   var value = toStr(raw,2000);
   if(!value) return '';
+  if(!/^https?:\/\//i.test(value)) return '';
   try{
-    var url = new URL(value, window.location.href);
+    var url = new URL(value);
     if(url.protocol!=='https:' && url.protocol!=='http:') return '';
     return url.href;
   }catch(e){
@@ -250,7 +251,9 @@ function sanitizeAttachmentUrl(raw){
   var mimeMatch = value.match(/^data:([^;,]+)[;,]/i);
   if(!mimeMatch) return '';
   var mime = (mimeMatch[1]||'').toLowerCase();
-  if(mime==='text/html' || mime==='image/svg+xml') return '';
+  var SAFE_MIMES = ['image/png','image/jpeg','image/gif','image/webp','image/bmp',
+    'application/pdf','text/plain','text/csv','application/json','application/zip'];
+  if(SAFE_MIMES.indexOf(mime)===-1) return '';
   return value;
 }
 
@@ -797,11 +800,12 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 // ===== MAPS =====
 function makePinHtml(type,label){
   var c=COLORS[type]||COLORS.sight;
-  if(type==='viewpoint')return '<div class="pin-base pin-viewpoint" style="background:'+c+'"><span>'+(label||'')+'</span></div>';
-  if(type==='transport')return '<div class="pin-base pin-transport" style="background:'+c+'"><span>'+(label||'')+'</span></div>';
-  if(type==='hotel')return '<div class="pin-base pin-hotel" style="background:'+c+'">'+(label||'H')+'</div>';
-  if(type==='food')return '<div class="pin-base pin-food" style="background:'+c+'">'+(label||'')+'</div>';
-  return '<div class="pin-base pin-sight" style="background:'+c+'">'+(label||'')+'</div>';
+  var safe=esc(label||'');
+  if(type==='viewpoint')return '<div class="pin-base pin-viewpoint" style="background:'+c+'"><span>'+safe+'</span></div>';
+  if(type==='transport')return '<div class="pin-base pin-transport" style="background:'+c+'"><span>'+safe+'</span></div>';
+  if(type==='hotel')return '<div class="pin-base pin-hotel" style="background:'+c+'">'+(safe||'H')+'</div>';
+  if(type==='food')return '<div class="pin-base pin-food" style="background:'+c+'">'+safe+'</div>';
+  return '<div class="pin-base pin-sight" style="background:'+c+'">'+safe+'</div>';
 }
 
 function makeIcon(type,label){
