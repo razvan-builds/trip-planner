@@ -1,0 +1,613 @@
+{
+  "tripName": "Londra",
+  "dates": "21 — 23 Martie 2026",
+  "hotel": {
+    "name": "Clayton Hotel Tower Bridge",
+    "lat": 51.5149,
+    "lng": -0.0707
+  },
+  "transport": [
+    {
+      "name": "St Pancras International",
+      "lat": 51.5317,
+      "lng": -0.126,
+      "note": "Thameslink ↔ Luton"
+    },
+    {
+      "name": "Tower Hill Station",
+      "lat": 51.51,
+      "lng": -0.0765,
+      "note": "Lângă hotel"
+    }
+  ],
+  "days": [
+    {
+      "id": "d1",
+      "title": "Ziua 1",
+      "date": "Sâmbătă, 21 Martie",
+      "subtitle": "City → South Bank → London Eye → Westminster → Apus Waterloo Bridge",
+      "collapsed": false,
+      "spots": [
+        {
+          "id": "s1",
+          "name": "Tower of London",
+          "time": "10:30",
+          "desc": "Fortăreața medievală, de afară e impresionantă. ~1000 de ani de istorie.",
+          "type": "sight",
+          "lat": 51.5081,
+          "lng": -0.0759,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Vedere de afară"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Tower+of+London"
+        },
+        {
+          "id": "s2",
+          "name": "Tower Bridge",
+          "time": "10:50",
+          "desc": "Pod basculant iconic din 1894. Traversează-l pe jos.",
+          "type": "sight",
+          "lat": 51.5055,
+          "lng": -0.0754,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Iconic",
+            "Gratis"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Tower+Bridge+London"
+        },
+        {
+          "id": "s3",
+          "name": "St Dunstan in the East",
+          "time": "11:15",
+          "desc": "Ruine gotice transformate în grădină. Extrem de fotogenic.",
+          "type": "sight",
+          "lat": 51.5098,
+          "lng": -0.0783,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Hidden Gem",
+            "Gratis"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=St+Dunstan+in+the+East+London"
+        },
+        {
+          "id": "s4",
+          "name": "The Garden at 120",
+          "time": "11:40",
+          "desc": "Viewpoint la etaj 15, panoramă spre Shard și Tower Bridge.",
+          "type": "viewpoint",
+          "lat": 51.5128,
+          "lng": -0.0832,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Viewpoint",
+            "Fără rezervare"
+          ],
+          "mapsUrl": "https://maps.app.goo.gl/JMUkwHfU7end8rHfA"
+        },
+        {
+          "id": "s5",
+          "name": "Leadenhall Market",
+          "time": "12:00",
+          "desc": "Piață victoriană, loc de filmare Diagon Alley (Harry Potter).",
+          "type": "sight",
+          "lat": 51.513,
+          "lng": -0.0834,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Arhitectură",
+            "Gratis"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Leadenhall+Market+London"
+        },
+        {
+          "id": "s6",
+          "name": "Monument to the Great Fire",
+          "time": "12:20",
+          "desc": "Coloană de 62m, oprire rapidă.",
+          "type": "sight",
+          "lat": 51.5101,
+          "lng": -0.0859,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Oprire rapidă"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Monument+to+the+Great+Fire+of+London"
+        },
+        {
+          "id": "s7",
+          "name": "Borough Market",
+          "time": "12:40",
+          "desc": "Food market legendar. Steak sandwich, raclette, paella. £8–15.",
+          "type": "food",
+          "lat": 51.5055,
+          "lng": -0.091,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Prânz",
+            "Food Market"
+          ],
+          "mapsUrl": "https://maps.app.goo.gl/7cgmzef3gcoZT9zQA"
+        },
+        {
+          "id": "s8",
+          "name": "St Paul's Cathedral",
+          "time": "14:00",
+          "desc": "Capodopera lui Wren. A doua cupolă din lume ca mărime.",
+          "type": "sight",
+          "lat": 51.5138,
+          "lng": -0.0984,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Iconic"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=St+Paul's+Cathedral+London"
+        },
+        {
+          "id": "s8b",
+          "name": "One New Change Rooftop",
+          "time": "14:10",
+          "desc": "Terasă la etaj 6 lângă St Paul's. Vedere directă spre cupolă.",
+          "type": "viewpoint",
+          "lat": 51.5136,
+          "lng": -0.0954,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Viewpoint",
+            "Fără rezervare"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=One+New+Change+London+EC4M+9AF"
+        },
+        {
+          "id": "s9",
+          "name": "Millennium Bridge → South Bank",
+          "time": "14:20",
+          "desc": "Pod pietonal, panoramă spre St Paul's.",
+          "type": "sight",
+          "lat": 51.5095,
+          "lng": -0.0985,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Traversare Tamisa"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Millennium+Bridge+London"
+        },
+        {
+          "id": "s10",
+          "name": "Tate Modern + Level 10 Viewpoint",
+          "time": "14:30",
+          "desc": "Etaj 10 Blavatnik Building — panoramă gratuită. Apoi plimbare pe South Bank spre London Eye.",
+          "type": "viewpoint",
+          "lat": 51.5076,
+          "lng": -0.0994,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Gratis",
+            "Viewpoint",
+            "Dacă plouă"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Tate+Modern+London"
+        },
+        {
+          "id": "s10c",
+          "name": "London Eye",
+          "time": "15:15",
+          "desc": "Roata panoramică iconică, 135m. Frumoasă de jos și din South Bank. Nu e nevoie să urci.",
+          "type": "sight",
+          "lat": 51.5033,
+          "lng": -0.1195,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Iconic",
+            "Vedere de afară"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=London+Eye"
+        },
+        {
+          "id": "s11",
+          "name": "Big Ben & Parliament",
+          "time": "15:30",
+          "desc": "Cel mai fotografiat colț al Londrei. View perfect de pe Westminster Bridge.",
+          "type": "sight",
+          "lat": 51.5007,
+          "lng": -0.1246,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Iconic"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Big+Ben+London"
+        },
+        {
+          "id": "s12",
+          "name": "Westminster Abbey",
+          "time": "16:00",
+          "desc": "Biserică gotică, încoronări regale. ~158 RON dacă intri.",
+          "type": "sight",
+          "lat": 51.4993,
+          "lng": -0.1273,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Gotic"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Westminster+Abbey+London"
+        },
+        {
+          "id": "s13",
+          "name": "St James's Park",
+          "time": "16:30",
+          "desc": "Cel mai vechi parc regal. Pelicani, lac. Buckingham Palace îl vezi Luni la Changing of the Guard!",
+          "type": "sight",
+          "lat": 51.5025,
+          "lng": -0.134,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Plimbare"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=St+James's+Park+London"
+        },
+        {
+          "id": "s13b",
+          "name": "Waterloo Bridge — Apus",
+          "time": "17:30",
+          "desc": "Cel mai frumos apus din Londra. Vedere spre St Paul's (est) și Parliament (vest). Apus ~18:10.",
+          "type": "viewpoint",
+          "lat": 51.508,
+          "lng": -0.1171,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Apus",
+            "Gratis",
+            "Viewpoint"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Waterloo+Bridge+London"
+        },
+        {
+          "id": "s14",
+          "name": "Flat Iron / Dishoom",
+          "time": "19:00",
+          "desc": "Flat Iron: steak ~£15. Dishoom: indiană legendară. La 5 min de Waterloo Bridge.",
+          "type": "food",
+          "lat": 51.5108,
+          "lng": -0.1241,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Cină"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Flat+Iron+Steak+Covent+Garden+London"
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "title": "Ziua 2",
+      "date": "Duminică, 22 Martie",
+      "subtitle": "British Museum → Primrose Hill → Camden → Soho",
+      "collapsed": false,
+      "spots": [
+        {
+          "id": "s15",
+          "name": "British Museum",
+          "time": "10:00",
+          "desc": "Gratis. Rosetta Stone, Parthenon, mumii egiptene. 2.5h.",
+          "type": "sight",
+          "lat": 51.5194,
+          "lng": -0.127,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Gratis",
+            "Impresionant"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=British+Museum+London"
+        },
+        {
+          "id": "s16",
+          "name": "Roti King",
+          "time": "13:00",
+          "desc": "Roti canai malaezian, ieftin și autentic. Lângă Euston.",
+          "type": "food",
+          "lat": 51.5291,
+          "lng": -0.132,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Prânz"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Roti+King+London"
+        },
+        {
+          "id": "s17",
+          "name": "Regent's Park",
+          "time": "14:00",
+          "desc": "Grădini formale, lacuri, Nash Terraces.",
+          "type": "sight",
+          "lat": 51.5313,
+          "lng": -0.157,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Plimbare"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Regent's+Park+London"
+        },
+        {
+          "id": "s17b",
+          "name": "Primrose Hill",
+          "time": "15:00",
+          "desc": "Panoramă 360° spre toată Londra. 5 min urcuș, 15 min spre Camden.",
+          "type": "viewpoint",
+          "lat": 51.5399,
+          "lng": -0.1614,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Viewpoint",
+            "Gratis"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Primrose+Hill+London"
+        },
+        {
+          "id": "s18",
+          "name": "Camden Market",
+          "time": "15:40",
+          "desc": "Street food, vintage, artă stradală. Regent's Canal.",
+          "type": "sight",
+          "lat": 51.5414,
+          "lng": -0.1466,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Atmosferă unică"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Camden+Market+London"
+        },
+        {
+          "id": "s19",
+          "name": "Covent Garden",
+          "time": "17:30",
+          "desc": "Piazza, artiști stradali. Neal's Yard — curte colorată.",
+          "type": "sight",
+          "lat": 51.512,
+          "lng": -0.1236,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Plimbare"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Covent+Garden+London"
+        },
+        {
+          "id": "s20",
+          "name": "Bao / Chinatown",
+          "time": "19:30",
+          "desc": "Bao: buns taiwaneze. Hoppers: Sri Lanka. Chinatown: £10–12.",
+          "type": "food",
+          "lat": 51.5132,
+          "lng": -0.1366,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Cină"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Bao+Soho+London"
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "title": "Ziua 3",
+      "date": "Luni, 23 Martie",
+      "subtitle": "Notting Hill → Changing of the Guard → Hyde Park → Piccadilly → Apus Horizon 22",
+      "collapsed": false,
+      "spots": [
+        {
+          "id": "s21",
+          "name": "Notting Hill & Portobello Road",
+          "time": "09:30",
+          "desc": "Case pastelate, cafenele. Lancaster Road, St Luke's Mews. Start devreme ca să prinzi și garda!",
+          "type": "sight",
+          "lat": 51.5085,
+          "lng": -0.2023,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Plimbare"
+          ],
+          "mapsUrl": "https://maps.app.goo.gl/SQgGvta2MGjY3fXn8"
+        },
+        {
+          "id": "s21b",
+          "name": "Changing of the Guard",
+          "time": "11:00",
+          "desc": "Ceremonie completă în fața Palatului Buckingham. Vino la 10:30 pentru loc bun. Durează ~45 min. Metrou: Notting Hill Gate → Green Park (10 min).",
+          "type": "sight",
+          "lat": 51.5014,
+          "lng": -0.1419,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "https://changing-guard.com/dates-buckingham-palace.html",
+          "attachments": [],
+          "tags": [
+            "Iconic",
+            "Gratis",
+            "Luni confirmat"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Buckingham+Palace+London"
+        },
+        {
+          "id": "s22",
+          "name": "The Churchill Arms",
+          "time": "12:15",
+          "desc": "Pub acoperit de flori. Thai food bun și ieftin. Plimbare prin Hyde Park de la Green Park → Kensington.",
+          "type": "food",
+          "lat": 51.5069,
+          "lng": -0.1948,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Prânz"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=The+Churchill+Arms+Kensington+London"
+        },
+        {
+          "id": "s23",
+          "name": "Hyde Park & Kensington Gardens",
+          "time": "13:15",
+          "desc": "Serpentine Lake, Diana Memorial, Peter Pan Statue.",
+          "type": "sight",
+          "lat": 51.5073,
+          "lng": -0.1657,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Plimbare"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Hyde+Park+London"
+        },
+        {
+          "id": "s24",
+          "name": "Harrods",
+          "time": "15:00",
+          "desc": "Food Hall spectaculos. Gratis să intri.",
+          "type": "sight",
+          "lat": 51.4994,
+          "lng": -0.1633,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Experiență"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Harrods+London"
+        },
+        {
+          "id": "s25",
+          "name": "Piccadilly Circus & Regent Street",
+          "time": "16:00",
+          "desc": "Ecrane luminoase, Regent Street.",
+          "type": "sight",
+          "lat": 51.51,
+          "lng": -0.134,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Iconic"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=Piccadilly+Circus+London"
+        },
+        {
+          "id": "s26",
+          "name": "Horizon 22 — Apus",
+          "time": "17:15",
+          "desc": "Etaj 58, cea mai înaltă priveliște din City. APUS ~18:14! Vino cu 45 min înainte pentru golden hour. Gratuit cu rezervare obligatorie.",
+          "type": "viewpoint",
+          "lat": 51.5144,
+          "lng": -0.0831,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "https://horizon22.co.uk",
+          "attachments": [],
+          "tags": [
+            "Apus",
+            "Viewpoint",
+            "Rezervare!"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=22+Bishopsgate+London"
+        },
+        {
+          "id": "s27",
+          "name": "Zona Tower Bridge — Cină",
+          "time": "18:45",
+          "desc": "The Ivy Tower Bridge sau casual pe Bermondsey Street. Ultimul view spre Tower Bridge luminat!",
+          "type": "food",
+          "lat": 51.5048,
+          "lng": -0.076,
+          "visited": false,
+          "appointment": "",
+          "ticketUrl": "",
+          "attachments": [],
+          "tags": [
+            "Cină"
+          ],
+          "mapsUrl": "https://maps.google.com/?q=The+Ivy+Tower+Bridge+London"
+        }
+      ]
+    }
+  ]
+}
