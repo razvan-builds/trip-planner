@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Trip Planner</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f5f3f0;color:#2d2d2d;line-height:1.6}
+
+/* ===== HERO ===== */
+.hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:40px 20px;text-align:center;position:relative}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.6rem;cursor:pointer;border-bottom:2px dashed transparent;display:inline-block}
+.hero h1:hover{border-bottom-color:rgba(255,255,255,.3)}
+.hero .dates{font-size:1rem;opacity:.8;margin-top:4px;cursor:pointer}
+.hero .hotel{font-size:.85rem;opacity:.6;margin-top:8px;cursor:pointer}
+.hero-edit{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:8px;font-size:.85rem;font-family:'Inter',sans-serif;width:300px;max-width:90%;text-align:center}
+.hero-actions{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-hero{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;font-family:'Inter',sans-serif;transition:.2s}
+.btn-hero:hover{background:rgba(255,255,255,.2)}
+
+/* ===== MASTER MAP ===== */
+.master-section{max-width:940px;margin:20px auto 0;padding:0 16px}
+.master-wrap{border-radius:14px;overflow:hidden;box-shadow:0 3px 20px rgba(0,0,0,.1)}
+.master-map{height:420px;width:100%}
+.master-label{background:#1a1a2e;color:#fff;text-align:center;padding:10px;font-size:.8rem;font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.legend{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;padding:12px 16px;background:#eae8e4;font-size:.75rem;color:#666;font-weight:500}
+.legend-item{display:flex;align-items:center;gap:5px}
+.leg-dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700}
+
+/* ===== CONTAINER ===== */
+.container{max-width:900px;margin:0 auto;padding:0 16px}
+
+/* ===== DAY ===== */
+.day{margin-top:30px}
+.day-header{display:flex;align-items:center;gap:12px;padding:16px 20px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.05);cursor:pointer;user-select:none;position:relative}
+.day-header:hover{box-shadow:0 3px 16px rgba(0,0,0,.1)}
+.day-chevron{font-size:1.2rem;transition:transform .3s;color:#aaa;flex-shrink:0}
+.day-chevron.open{transform:rotate(90deg)}
+.day-title{flex:1}
+.day-title h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a1a2e}
+.day-title .day-sub{font-size:.8rem;color:#999;margin-top:2px}
+.day-progress{font-size:.75rem;color:#aaa;background:#f5f3f0;padding:4px 10px;border-radius:12px}
+.day-body{overflow:hidden;transition:max-height .4s ease}
+.day-body.collapsed{max-height:0 !important}
+
+/* ===== DAY MAP ===== */
+.day-map-wrap{margin:16px 0;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.day-map{height:240px;width:100%}
+
+/* ===== SPOT ===== */
+.spot{position:relative;margin:12px 0;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s;border-left:4px solid #e63946}
+.spot:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.spot.type-food{border-left-color:#ff9800;background:linear-gradient(135deg,#fffbf5,#fff8f0)}
+.spot.type-viewpoint{border-left-color:#00897b;background:linear-gradient(135deg,#f0faf9,#edf7f6)}
+.spot.type-transport{border-left-color:#7c4dff;background:linear-gradient(135deg,#f5f0ff,#f0eaff)}
+.spot.type-hotel{border-left-color:#1565c0}
+.spot.visited{opacity:.55}
+.spot.visited .spot-name{text-decoration:line-through}
+.spot-top{display:flex;align-items:flex-start;gap:12px;padding:16px 16px 10px}
+.spot-check{width:22px;height:22px;border-radius:6px;border:2px solid #ccc;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:.2s;background:#fff}
+.spot-check:hover{border-color:#e63946}
+.spot-check.checked{background:#e63946;border-color:#e63946;color:#fff}
+.spot-pin-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.spot-pin-badge.badge-sight{background:#e63946}
+.spot-pin-badge.badge-food{background:#ff9800;border-radius:5px}
+.spot-pin-badge.badge-viewpoint{background:#00897b;border-radius:3px;transform:rotate(45deg);width:22px;height:22px;font-size:10px}
+.spot-pin-badge.badge-viewpoint span{transform:rotate(-45deg);display:block}
+.spot-pin-badge.badge-transport{background:#7c4dff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);font-size:10px}
+.spot-pin-badge.badge-transport span{transform:rotate(45deg);display:block}
+.spot-info{flex:1;min-width:0}
+.spot-time{font-size:.7rem;font-weight:600;color:#e63946;text-transform:uppercase;letter-spacing:1.5px}
+.type-food .spot-time{color:#e65100}
+.type-viewpoint .spot-time{color:#00897b}
+.spot-name{font-family:'Playfair Display',serif;font-size:1.15rem;color:#1a1a2e;margin:2px 0 4px}
+.spot-desc{font-size:.85rem;color:#777;line-height:1.6}
+.spot-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.stag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.7rem;font-weight:500}
+.stag-sight{background:#e3f2fd;color:#1565c0}.stag-food{background:#fff3e0;color:#e65100}
+.stag-free{background:#f3e5f5;color:#7b1fa2}.stag-viewpoint{background:#e0f7fa;color:#00695c}
+.stag-walk{background:#e8f5e9;color:#2e7d32}.stag-hidden{background:#fce4ec;color:#c62828}
+.stag-rain{background:#eceff1;color:#546e7a}
+.spot-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.spot-btn{width:28px;height:28px;border-radius:6px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#999;transition:.15s}
+.spot-btn:hover{background:#f5f5f5;color:#333;border-color:#bbb}
+
+/* ===== SPOT EXTRAS ===== */
+.spot-extras{padding:0 16px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.extra-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:.75rem;border:1px solid #e8e8e8;background:#fafafa;color:#666;cursor:pointer;transition:.15s}
+.extra-pill:hover{background:#f0f0f0;border-color:#ccc}
+.extra-pill.has-value{background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32}
+.extra-pill input{border:none;background:transparent;font-size:.75rem;font-family:'Inter',sans-serif;color:#333;width:130px;outline:none}
+.extra-pill a{color:#1565c0;text-decoration:none;font-weight:500}
+.extra-pill a:hover{text-decoration:underline}
+
+/* ===== SPOT MAP LINK ===== */
+.spot-map-link{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:8px;font-size:.75rem;border:1px solid #bbdefb;background:#e3f2fd;color:#1565c0;text-decoration:none;font-weight:500;transition:.15s}
+.spot-map-link:hover{background:#bbdefb}
+
+/* ===== MOVE DROPDOWN ===== */
+.move-dropdown{position:absolute;top:44px;right:16px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:100;min-width:160px;overflow:hidden}
+.move-dropdown div{padding:10px 16px;font-size:.8rem;cursor:pointer;transition:.1s}
+.move-dropdown div:hover{background:#f0f0f0}
+
+/* ===== ADD BUTTONS ===== */
+.add-spot-btn{width:100%;padding:12px;border:2px dashed #ddd;border-radius:12px;background:transparent;color:#aaa;font-size:.8rem;cursor:pointer;margin:12px 0;transition:.2s;font-family:'Inter',sans-serif}
+.add-spot-btn:hover{border-color:#999;color:#666}
+.add-day-btn{display:block;width:100%;max-width:400px;margin:30px auto;padding:14px;border:2px dashed #ccc;border-radius:14px;background:transparent;color:#999;font-size:.9rem;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+.add-day-btn:hover{border-color:#888;color:#555}
+
+/* ===== TIPS ===== */
+.tips{background:#1a1a2e;color:#fff;padding:40px 20px;margin-top:40px}
+.tips h2{font-family:'Playfair Display',serif;text-align:center;font-size:1.6rem;margin-bottom:24px}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:900px;margin:0 auto}
+.tip{background:rgba(255,255,255,.08);border-radius:10px;padding:16px}
+.tip h3{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;opacity:.6;margin-bottom:6px}
+.tip p{font-size:.85rem;opacity:.85;line-height:1.5}
+
+/* ===== MODAL ===== */
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:16px}
+.modal label{display:block;font-size:.8rem;font-weight:500;color:#555;margin:12px 0 4px}
+.modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.85rem;font-family:'Inter',sans-serif}
+.modal textarea{resize:vertical;min-height:60px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-family:'Inter',sans-serif;font-weight:500}
+.modal-btn.primary{background:#1a1a2e;color:#fff}
+.modal-btn.secondary{background:#f0f0f0;color:#666}
+.modal-btn.danger{background:#ffebee;color:#c62828}
+
+/* ===== PROMPT MODAL ===== */
+.prompt-modal{background:#fff;border-radius:16px;padding:0;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.2);overflow:hidden}
+.prompt-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #eee;flex-shrink:0}
+.prompt-header h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin:0}
+.prompt-header-btns{display:flex;gap:8px}
+.prompt-copy-btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.8rem;font-family:'Inter',sans-serif;font-weight:600;background:#1a1a2e;color:#fff;transition:.2s}
+.prompt-copy-btn:hover{background:#2a2a4e}
+.prompt-copy-btn.copied{background:#2e7d32}
+.prompt-close-btn{padding:8px 14px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:.85rem;color:#666;font-family:'Inter',sans-serif}
+.prompt-body{flex:1;overflow-y:auto;padding:20px 24px}
+.prompt-body pre{white-space:pre-wrap;word-wrap:break-word;font-family:'Inter',monospace;font-size:.8rem;line-height:1.7;color:#333;background:#f8f7f5;padding:20px;border-radius:10px;border:1px solid #e8e6e2}
+.prompt-footer{padding:14px 24px;border-top:1px solid #eee;font-size:.75rem;color:#999;text-align:center;flex-shrink:0}
+
+/* ===== ATTACHMENT ===== */
+.attachment-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.att-chip{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:#e3f2fd;font-size:.7rem;color:#1565c0}
+.att-chip .att-remove{cursor:pointer;opacity:.6;margin-left:2px}
+.att-chip .att-remove:hover{opacity:1}
+
+/* ===== FILTER BUTTONS ===== */
+.filter-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:12px 16px;background:#f5f3f0}
+.filter-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:.75rem;font-weight:600;font-family:'Inter',sans-serif;color:#888;transition:.2s}
+.filter-btn:hover{border-color:#999;color:#555}
+.filter-btn.active{border-color:currentColor;color:#fff}
+.filter-btn.active.f-sight{background:#e63946;border-color:#e63946}
+.filter-btn.active.f-food{background:#ff9800;border-color:#ff9800}
+.filter-btn.active.f-viewpoint{background:#00897b;border-color:#00897b}
+.filter-btn.active.f-transport{background:#7c4dff;border-color:#7c4dff}
+.filter-btn.active.f-all{background:#1a1a2e;border-color:#1a1a2e}
+.spot.filtered-out{display:none}
+
+.footer{text-align:center;padding:24px;font-size:.75rem;color:#bbb}
+
+/* ===== PIN STYLES (reused from original) ===== */
+.pin-base{display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.pin-sight{width:26px;height:26px;border-radius:50%;background:#e63946;border:3px solid #fff;font-size:12px}
+.pin-food{width:26px;height:26px;border-radius:5px;background:#ff9800;border:3px solid #fff;font-size:12px}
+.pin-viewpoint{width:22px;height:22px;border-radius:3px;background:#00897b;border:3px solid #fff;font-size:10px;transform:rotate(45deg)}
+.pin-viewpoint span{transform:rotate(-45deg);display:block}
+.pin-transport{width:26px;height:26px;border-radius:50% 50% 50% 0;background:#7c4dff;border:3px solid #fff;font-size:10px;transform:rotate(-45deg)}
+.pin-transport span{transform:rotate(45deg);display:block}
+.pin-hotel{width:30px;height:30px;border-radius:50%;background:#1565c0;border:3px solid #fff;font-size:13px}
+
+@media(max-width:600px){
+  .hero h1{font-size:1.8rem}
+  .master-map{height:300px}
+  .day-map{height:180px}
+  .spot-top{padding:12px}
+  .modal{margin:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ===== STATE =====
+var COLORS = {sight:'#e63946',food:'#ff9800',viewpoint:'#00897b',transport:'#7c4dff',hotel:'#1565c0'};
+var DAY_COLORS = ['#e63946','#1565c0','#00897b','#ff9800','#7c4dff','#795548','#e91e63'];
+
+function createDefaultState(){
+  return {
+    tripName: 'Trip nou',
+    dates: '',
+    hotel: {name:'Hotel',lat:0,lng:0},
+    transport: [],
+    days: [
+      {id:'d1',title:'Ziua 1',date:'',subtitle:'',collapsed:false,spots:[]}
+    ],
+    modal: null, // {type, dayIdx, spotIdx, data}
+    editingHero: null, // 'name','dates','hotel'
+    moveMenu: null, // {dayIdx, spotIdx}
+    filter: null, // null = all, 'sight', 'food', 'viewpoint', 'transport'
+    showPrompt: false
+  };
+}
+
+var state = createDefaultState();
+
+var maps = {};
+var nextId = 100;
+function uid(){return 'id_'+(nextId++)}
+var ALLOWED_SPOT_TYPES = {sight:true,food:true,viewpoint:true,transport:true};
+
+function toStr(v,maxLen){
+  var s = String(v==null?'':v).trim();
+  if(maxLen && s.length>maxLen) s = s.slice(0,maxLen);
+  return s;
+}
+
+function sanitizeCoordinate(v,min,max){
+  var n = parseFloat(v);
+  if(!isFinite(n)) return 0;
+  if(n<min || n>max) return 0;
+  return n;
+}
+
+function sanitizeHttpUrl(raw){
+  var value = toStr(raw,2000);
+  if(!value) return '';
+  try{
+    var url = new URL(value, window.location.href);
+    if(url.protocol!=='https:' && url.protocol!=='http:') return '';
+    return url.href;
+  }catch(e){
+    return '';
+  }
+}
+
+function sanitizeAttachmentUrl(raw){
+  var value = String(raw||'').trim();
+  if(!value || value.length>500000) return '';
+  if(!/^data:/i.test(value)) return '';
+  var mimeMatch = value.match(/^data:([^;,]+)[;,]/i);
+  if(!mimeMatch) return '';
+  var mime = (mimeMatch[1]||'').toLowerCase();
+  if(mime==='text/html' || mime==='image/svg+xml') return '';
+  return value;
+}
+
+function sanitizeTags(tags){
+  if(!Array.isArray(tags)) return [];
+  return tags.map(function(tag){return toStr(tag,40)}).filter(Boolean).slice(0,8);
+}
+
+function sanitizeAttachments(items){
+  if(!Array.isArray(items)) return [];
+  return items.map(function(item){
+    if(!item || typeof item!=='object') return null;
+    var name = toStr(item.name,120);
+    if(!name) return null;
+    return {name:name,dataUrl:sanitizeAttachmentUrl(item.dataUrl)};
+  }).filter(Boolean).slice(0,8);
+}
+
+function sanitizeSpot(spot,spotIndex){
+  var s = spot && typeof spot==='object' ? spot : {};
+  var type = ALLOWED_SPOT_TYPES[s.type] ? s.type : 'sight';
+  return {
+    id: /^[a-zA-Z0-9_-]{1,40}$/.test(String(s.id||'')) ? String(s.id) : 's'+(spotIndex+1),
+    name: toStr(s.name,120),
+    time: toStr(s.time,20),
+    desc: toStr(s.desc,600),
+    type: type,
+    lat: sanitizeCoordinate(s.lat,-90,90),
+    lng: sanitizeCoordinate(s.lng,-180,180),
+    visited: s.visited===true,
+    appointment: toStr(s.appointment,120),
+    ticketUrl: sanitizeHttpUrl(s.ticketUrl),
+    attachments: sanitizeAttachments(s.attachments),
+    tags: sanitizeTags(s.tags),
+    mapsUrl: sanitizeHttpUrl(s.mapsUrl)
+  };
+}
+
+function sanitizeDay(day,dayIndex){
+  var d = day && typeof day==='object' ? day : {};
+  var spots = Array.isArray(d.spots) ? d.spots.map(function(s,si){return sanitizeSpot(s,si)}).slice(0,80) : [];
+  return {
+    id: /^[a-zA-Z0-9_-]{1,40}$/.test(String(d.id||'')) ? String(d.id) : 'd'+(dayIndex+1),
+    title: toStr(d.title,80) || ('Ziua '+(dayIndex+1)),
+    date: toStr(d.date,80),
+    subtitle: toStr(d.subtitle,160),
+    collapsed: d.collapsed===true,
+    spots: spots
+  };
+}
+
+function sanitizeTransport(items){
+  if(!Array.isArray(items)) return [];
+  return items.map(function(item){
+    if(!item || typeof item!=='object') return null;
+    return {
+      name: toStr(item.name,100),
+      lat: sanitizeCoordinate(item.lat,-90,90),
+      lng: sanitizeCoordinate(item.lng,-180,180),
+      note: toStr(item.note,160)
+    };
+  }).filter(function(item){return item && item.name}).slice(0,20);
+}
+
+function sanitizeStateData(raw){
+  var input = raw && typeof raw==='object' ? raw : {};
+  var safe = createDefaultState();
+  safe.tripName = toStr(input.tripName,80) || safe.tripName;
+  safe.dates = toStr(input.dates,80);
+
+  if(input.hotel && typeof input.hotel==='object'){
+    safe.hotel = {
+      name: toStr(input.hotel.name,100) || 'Hotel',
+      lat: sanitizeCoordinate(input.hotel.lat,-90,90),
+      lng: sanitizeCoordinate(input.hotel.lng,-180,180)
+    };
+  }
+
+  safe.transport = sanitizeTransport(input.transport);
+
+  if(Array.isArray(input.days) && input.days.length){
+    safe.days = input.days.map(function(day,di){return sanitizeDay(day,di)}).slice(0,20);
+  }
+
+  return safe;
+}
+
+function applyImportedData(data){
+  var safe = sanitizeStateData(data);
+  state.tripName = safe.tripName;
+  state.dates = safe.dates;
+  state.hotel = safe.hotel;
+  state.transport = safe.transport;
+  state.days = safe.days;
+  state.modal = null;
+  state.editingHero = null;
+  state.moveMenu = null;
+  state.filter = null;
+  state.showPrompt = false;
+}
+
+// ===== AUTO-SAVE / LOAD =====
+var STORAGE_KEY = 'trip_planner_v3';
+
+function autoSave(){
+  try{
+    var clone = sanitizeStateData({tripName:state.tripName,dates:state.dates,hotel:state.hotel,transport:state.transport,days:state.days});
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clone));
+  }catch(e){}
+}
+
+function autoLoad(){
+  try{
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if(!saved) return false;
+    applyImportedData(JSON.parse(saved));
+    return true;
+  }catch(e){return false}
+}
+
+// Try to load saved state on startup
+autoLoad();
+
+// ===== RENDER =====
+function render(){
+  var app = document.getElementById('app');
+  app.innerHTML = renderHero() + renderMasterMap() + '<div class="container">' + state.days.map(function(d,di){return renderDay(d,di)}).join('') + '<button class="add-day-btn" onclick="addDay()">+ Adaugă o zi nouă</button></div>' + renderTips() + '<div class="footer">Trip Planner Template — datele se salvează automat în browser</div>' + renderModal() + renderPromptModal();
+  initAllMaps();
+  autoSave();
+  // close menus on outside click
+  document.addEventListener('click',function(e){if(!e.target.closest('.move-dropdown')&&!e.target.closest('.spot-btn')){state.moveMenu=null;closeAllMenus()}},{once:true});
+}
+
+function renderHero(){
+  var h = state;
+  var nameHtml = h.editingHero==='name'?'<input class="hero-edit" value="'+esc(h.tripName)+'" onblur="saveHero(\'name\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<h1 onclick="editHero(\'name\')">'+esc(h.tripName)+'</h1>';
+  var datesHtml = h.editingHero==='dates'?'<input class="hero-edit" value="'+esc(h.dates)+'" onblur="saveHero(\'dates\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<div class="dates" onclick="editHero(\'dates\')">'+esc(h.dates)+'</div>';
+  var hotelHtml = h.editingHero==='hotel'?'<input class="hero-edit" value="'+esc(h.hotel.name)+'" onblur="saveHero(\'hotel\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" autofocus>':'<div class="hotel" onclick="editHero(\'hotel\')">'+esc(h.hotel.name)+'</div>';
+  return '<div class="hero">'+nameHtml+datesHtml+hotelHtml+'<div class="hero-actions"><button class="btn-hero" onclick="exportData()">💾 Export JSON</button><label class="btn-hero">📂 Import JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label><button class="btn-hero" onclick="showJsonHelp()">📋 Prompt AI trip</button><button class="btn-hero" onclick="newTrip()">🆕 Trip nou</button></div></div>';
+}
+
+function renderMasterMap(){
+  var f = state.filter;
+  var allCls = 'filter-btn f-all'+(f===null?' active':'');
+  var sightCls = 'filter-btn f-sight'+(f==='sight'?' active':'');
+  var foodCls = 'filter-btn f-food'+(f==='food'?' active':'');
+  var viewCls = 'filter-btn f-viewpoint'+(f==='viewpoint'?' active':'');
+  var transCls = 'filter-btn f-transport'+(f==='transport'?' active':'');
+
+  return '<div class="master-section"><div class="master-wrap"><div class="master-map" id="master-map"></div><div class="master-label">Harta completă — toate zilele</div></div>' +
+    '<div class="legend"><div class="legend-item"><div class="leg-dot" style="background:#e63946">1</div> Obiective</div><div class="legend-item"><div class="leg-dot" style="background:#ff9800;border-radius:3px">1</div> Mâncare</div><div class="legend-item"><div class="leg-dot" style="background:#00897b">V</div> Viewpoints</div><div class="legend-item"><div class="leg-dot" style="background:#7c4dff">T</div> Transport</div><div class="legend-item"><div class="leg-dot" style="background:#1565c0">H</div> Hotel</div></div>' +
+    '<div class="filter-bar"><button class="'+allCls+'" onclick="setFilter(null)">Toate</button><button class="'+sightCls+'" onclick="setFilter(\'sight\')">🏛 Obiective</button><button class="'+foodCls+'" onclick="setFilter(\'food\')">🍽 Mâncare</button><button class="'+viewCls+'" onclick="setFilter(\'viewpoint\')">🔭 Viewpoints</button><button class="'+transCls+'" onclick="setFilter(\'transport\')">🚇 Transport</button></div></div>';
+}
+
+function renderDay(d,di){
+  var fSpots = state.filter ? d.spots.filter(function(s){return s.type===state.filter}) : d.spots;
+  var visited = fSpots.filter(function(s){return s.visited}).length;
+  var total = fSpots.length;
+  var prog = total?Math.round(visited/total*100):0;
+  var chevClass = d.collapsed?'day-chevron':'day-chevron open';
+  var bodyStyle = d.collapsed?'class="day-body collapsed"':'class="day-body"';
+
+  var spotsHtml = d.spots.map(function(s,si){return renderSpot(s,si,di)}).join('');
+
+  return '<div class="day"><div class="day-header" onclick="toggleDay('+di+')"><div class="'+chevClass+'">▶</div><div class="day-title"><h2>'+esc(d.title)+' — '+esc(d.date)+'</h2><div class="day-sub">'+esc(d.subtitle)+'</div></div><div class="day-progress">'+visited+'/'+total+' ('+prog+'%)</div></div><div '+bodyStyle+'><div class="day-map-wrap"><div class="day-map" id="day-map-'+di+'"></div></div>'+spotsHtml+'<button class="add-spot-btn" onclick="openAddSpot('+di+')">+ Adaugă o oprire</button></div></div>';
+}
+
+function renderSpot(s,si,di){
+  var hidden = state.filter && s.type !== state.filter;
+  var cls = 'spot type-'+s.type+(s.visited?' visited':'')+(hidden?' filtered-out':'');
+  var checkCls = 'spot-check'+(s.visited?' checked':'');
+  var checkIcon = s.visited?'✓':'';
+  var pinNum = si+1;
+  var badgeCls = 'spot-pin-badge badge-'+s.type;
+  var needsInnerSpan = (s.type==='viewpoint'||s.type==='transport');
+  var badgeHtml = '<div class="'+badgeCls+'">'+(needsInnerSpan?'<span>'+pinNum+'</span>':pinNum)+'</div>';
+
+  var tagsHtml = (s.tags||[]).map(function(t){
+    var tc = 'stag stag-sight';
+    if(t.match(/prânz|cină|food/i))tc='stag stag-food';
+    if(t.match(/gratis|free/i))tc='stag stag-free';
+    if(t.match(/view/i))tc='stag stag-viewpoint';
+    if(t.match(/plimb|walk/i))tc='stag stag-walk';
+    if(t.match(/hidden|gem/i))tc='stag stag-hidden';
+    if(t.match(/plou|rain/i))tc='stag stag-rain';
+    return '<span class="'+tc+'">'+esc(t)+'</span>';
+  }).join('');
+
+  var extrasHtml = '';
+  var safeTicketUrl = sanitizeHttpUrl(s.ticketUrl);
+  var safeMapsUrl = sanitizeHttpUrl(s.mapsUrl);
+  // Appointment
+  if(s.appointment){
+    extrasHtml += '<span class="extra-pill has-value" onclick="event.stopPropagation()">📅 '+esc(s.appointment)+'</span>';
+  } else {
+    extrasHtml += '<span class="extra-pill" onclick="event.stopPropagation();setAppointment('+di+','+si+')">📅 Rezervare</span>';
+  }
+  // Ticket URL
+  if(safeTicketUrl){
+    extrasHtml += '<span class="extra-pill has-value"><a href="'+esc(safeTicketUrl)+'" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🎫 Bilet</a></span>';
+  } else {
+    extrasHtml += '<span class="extra-pill" onclick="event.stopPropagation();setTicketUrl('+di+','+si+')">🎫 + Link bilet</span>';
+  }
+  // Attachments
+  extrasHtml += '<label class="extra-pill" onclick="event.stopPropagation()">📎 Atașează<input type="file" style="display:none" onchange="attachFile('+di+','+si+',event)"></label>';
+  // Maps link
+  if(safeMapsUrl){
+    extrasHtml += '<a class="spot-map-link" href="'+esc(safeMapsUrl)+'" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">📍 Maps</a>';
+  }
+
+  var attHtml = '';
+  if(s.attachments && s.attachments.length){
+    attHtml = '<div class="attachment-list" style="padding:0 16px 10px">';
+    s.attachments.forEach(function(a,ai){
+      var safeName = toStr(a && a.name,120) || ('attachment-'+(ai+1));
+      var safeDataUrl = sanitizeAttachmentUrl(a && a.dataUrl);
+      if(safeDataUrl){
+        attHtml += '<span class="att-chip"><a href="'+esc(safeDataUrl)+'" download="'+esc(safeName)+'" rel="noopener noreferrer" onclick="event.stopPropagation()" style="color:#1565c0;text-decoration:none">'+esc(safeName)+'</a><span class="att-remove" onclick="event.stopPropagation();removeAttachment('+di+','+si+','+ai+')">✕</span></span>';
+      }else{
+        attHtml += '<span class="att-chip">'+esc(safeName)+'<span class="att-remove" onclick="event.stopPropagation();removeAttachment('+di+','+si+','+ai+')">✕</span></span>';
+      }
+    });
+    attHtml += '</div>';
+  }
+
+  var moveMenuHtml = '';
+  if(state.moveMenu && state.moveMenu.dayIdx===di && state.moveMenu.spotIdx===si){
+    moveMenuHtml = '<div class="move-dropdown">';
+    state.days.forEach(function(dd,ddi){
+      if(ddi!==di) moveMenuHtml += '<div onclick="event.stopPropagation();moveSpotToDay('+di+','+si+','+ddi+')">→ '+esc(dd.title)+'</div>';
+    });
+    moveMenuHtml += '</div>';
+  }
+
+  return '<div class="'+cls+'" data-day="'+di+'" data-spot="'+si+'"><div class="spot-top"><div class="'+checkCls+'" onclick="event.stopPropagation();toggleVisited('+di+','+si+')">'+checkIcon+'</div>'+badgeHtml+'<div class="spot-info"><div class="spot-time">'+esc(s.time)+'</div><div class="spot-name">'+esc(s.name)+'</div><div class="spot-desc">'+esc(s.desc)+'</div><div class="spot-tags">'+tagsHtml+'</div></div><div class="spot-actions"><button class="spot-btn" title="Sus" onclick="event.stopPropagation();moveSpot('+di+','+si+',-1)">↑</button><button class="spot-btn" title="Jos" onclick="event.stopPropagation();moveSpot('+di+','+si+',1)">↓</button><button class="spot-btn" title="Mută în altă zi" onclick="event.stopPropagation();toggleMoveMenu('+di+','+si+')">↗</button><button class="spot-btn" title="Editează" onclick="event.stopPropagation();openEditSpot('+di+','+si+')">✎</button><button class="spot-btn" title="Șterge" onclick="event.stopPropagation();deleteSpot('+di+','+si+')">✕</button>'+moveMenuHtml+'</div></div><div class="spot-extras">'+extrasHtml+'</div>'+attHtml+'</div>';
+}
+
+function renderTips(){
+  return '<div class="tips"><h2>Tips Practice</h2><div class="tips-grid"><div class="tip"><h3>Transport</h3><p>Contactless pe card bancar — metrou, bus, overground. Daily cap ~£8–9.</p></div><div class="tip"><h3>Luton ↔ Londra</h3><p>Thameslink train (~£15–18). Cumpără pe Trainline.</p></div><div class="tip"><h3>Distanțe</h3><p>18–22k pași/zi. Trasee pe zone geografice.</p></div><div class="tip"><h3>Vreme Martie</h3><p>Jachetă impermeabilă. 8–13°C.</p></div><div class="tip"><h3>Rezervări ACUM</h3><p>Horizon 22 / Sky Garden / The Lookout — gratuite dar se umplu.</p></div><div class="tip"><h3>Borough Market</h3><p>Închis lunea! Sâmbătă e cel mai bun moment.</p></div><div class="tip"><h3>Apus ☀️</h3><p>~18:10–18:15. Waterloo Bridge (Zi 1), Horizon 22 (Zi 3). Vino cu 45 min înainte!</p></div><div class="tip"><h3>Changing of the Guard</h3><p>Luni 23 Mar la 11:00. Vino la 10:30 pentru loc bun. Verifică: changing-guard.com</p></div></div></div>';
+}
+
+function renderModal(){
+  var m = state.modal;
+  if(!m) return '';
+  if(m.type==='editSpot'||m.type==='addSpot'){
+    var s = m.data;
+    return '<div class="modal-bg" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()"><h3>'+(m.type==='addSpot'?'Oprire nouă':'Editează oprirea')+'</h3><label>Nume</label><input id="m-name" value="'+esc(s.name)+'"><label>Ora</label><input id="m-time" value="'+esc(s.time)+'" placeholder="ex: 14:30"><label>Descriere</label><textarea id="m-desc">'+esc(s.desc)+'</textarea><label>Tip</label><select id="m-type"><option value="sight"'+(s.type==='sight'?' selected':'')+'>Obiectiv</option><option value="food"'+(s.type==='food'?' selected':'')+'>Mâncare</option><option value="viewpoint"'+(s.type==='viewpoint'?' selected':'')+'>Viewpoint</option><option value="transport"'+(s.type==='transport'?' selected':'')+'>Transport</option></select><label>Latitudine</label><input id="m-lat" value="'+(s.lat||'')+'" placeholder="51.5074"><label>Longitudine</label><input id="m-lng" value="'+(s.lng||'')+'" placeholder="-0.1278"><label>Google Maps URL</label><input id="m-maps" value="'+esc(s.mapsUrl||'')+'" placeholder="https://maps.google.com/?q=..."><label>Tags (separate prin virgulă)</label><input id="m-tags" value="'+esc((s.tags||[]).join(', '))+'"><label>Rezervare / Appointment</label><input id="m-appt" value="'+esc(s.appointment||'')+'" placeholder="ex: 23 Mar 17:30 — Sky Garden"><label>Link bilet</label><input id="m-ticket" value="'+esc(s.ticketUrl||'')+'" placeholder="https://..."><div class="modal-actions">'+(m.type==='editSpot'?'<button class="modal-btn danger" onclick="deleteSpot('+m.dayIdx+','+m.spotIdx+');closeModal()">Șterge</button>':'')+'<button class="modal-btn secondary" onclick="closeModal()">Anulează</button><button class="modal-btn primary" onclick="saveSpotModal()">Salvează</button></div></div></div>';
+  }
+  return '';
+}
+
+// ===== ACTIONS =====
+function setFilter(type){state.filter=type;render()}
+function toggleDay(di){state.days[di].collapsed=!state.days[di].collapsed;render()}
+function toggleVisited(di,si){state.days[di].spots[si].visited=!state.days[di].spots[si].visited;render()}
+
+function moveSpot(di,si,dir){
+  var spots=state.days[di].spots;
+  var ni=si+dir;
+  if(ni<0||ni>=spots.length)return;
+  var tmp=spots[si];spots[si]=spots[ni];spots[ni]=tmp;
+  render();
+}
+
+function toggleMoveMenu(di,si){
+  if(state.moveMenu&&state.moveMenu.dayIdx===di&&state.moveMenu.spotIdx===si){state.moveMenu=null}
+  else{state.moveMenu={dayIdx:di,spotIdx:si}}
+  render();
+}
+
+function closeAllMenus(){document.querySelectorAll('.move-dropdown').forEach(function(el){el.remove()})}
+
+function moveSpotToDay(fromDi,si,toDi){
+  var spot=state.days[fromDi].spots.splice(si,1)[0];
+  state.days[toDi].spots.push(spot);
+  state.moveMenu=null;
+  render();
+}
+
+function deleteSpot(di,si){
+  if(confirm('Ștergi "'+state.days[di].spots[si].name+'"?')){
+    state.days[di].spots.splice(si,1);render();
+  }
+}
+
+function openEditSpot(di,si){
+  var s=state.days[di].spots[si];
+  state.modal={type:'editSpot',dayIdx:di,spotIdx:si,data:JSON.parse(JSON.stringify(s))};
+  render();
+}
+
+function openAddSpot(di){
+  state.modal={type:'addSpot',dayIdx:di,spotIdx:-1,data:{id:uid(),name:'',time:'',desc:'',type:'sight',lat:'',lng:'',visited:false,appointment:'',ticketUrl:'',attachments:[],tags:[],mapsUrl:''}};
+  render();
+}
+
+function saveSpotModal(){
+  var m=state.modal;if(!m)return;
+  var rawTicketUrl = document.getElementById('m-ticket').value;
+  var rawMapsUrl = document.getElementById('m-maps').value;
+  var safeTicketUrl = sanitizeHttpUrl(rawTicketUrl);
+  var safeMapsUrl = sanitizeHttpUrl(rawMapsUrl);
+  var rawType = document.getElementById('m-type').value;
+
+  if(rawTicketUrl.trim() && !safeTicketUrl){alert('Linkul de bilet trebuie să fie un URL http/https valid.');return;}
+  if(rawMapsUrl.trim() && !safeMapsUrl){alert('Linkul Maps trebuie să fie un URL http/https valid.');return;}
+
+  var s = {
+    id: m.data.id||uid(),
+    name: toStr(document.getElementById('m-name').value,120),
+    time: toStr(document.getElementById('m-time').value,20),
+    desc: toStr(document.getElementById('m-desc').value,600),
+    type: ALLOWED_SPOT_TYPES[rawType] ? rawType : 'sight',
+    lat: parseFloat(document.getElementById('m-lat').value)||0,
+    lng: parseFloat(document.getElementById('m-lng').value)||0,
+    mapsUrl: safeMapsUrl,
+    tags: sanitizeTags(document.getElementById('m-tags').value.split(',').map(function(t){return t.trim()}).filter(Boolean)),
+    appointment: toStr(document.getElementById('m-appt').value,120),
+    ticketUrl: safeTicketUrl,
+    visited: m.data.visited||false,
+    attachments: sanitizeAttachments(m.data.attachments||[])
+  };
+  if(m.type==='editSpot'){state.days[m.dayIdx].spots[m.spotIdx]=s}
+  else{state.days[m.dayIdx].spots.push(s)}
+  closeModal();
+}
+
+function closeModal(){state.modal=null;render()}
+
+function setAppointment(di,si){
+  var v=prompt('Rezervare / Appointment:',state.days[di].spots[si].appointment||'');
+  if(v!==null){state.days[di].spots[si].appointment=toStr(v,120);render()}
+}
+
+function setTicketUrl(di,si){
+  var v=prompt('Link bilet / Ticket URL:',state.days[di].spots[si].ticketUrl||'');
+  if(v!==null){
+    var safe = sanitizeHttpUrl(v);
+    if(v.trim() && !safe){alert('Link invalid. Sunt acceptate doar URL-uri http/https.');return;}
+    state.days[di].spots[si].ticketUrl=safe;render();
+  }
+}
+
+function attachFile(di,si,ev){
+  var file=ev.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var safeName = toStr(file.name,120) || ('attachment-'+Date.now());
+    var safeDataUrl = sanitizeAttachmentUrl(e.target.result);
+    if(!safeDataUrl){alert('Fișierul nu poate fi atașat în format sigur.');return;}
+    state.days[di].spots[si].attachments.push({name:safeName,dataUrl:safeDataUrl});
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeAttachment(di,si,ai){
+  state.days[di].spots[si].attachments.splice(ai,1);render();
+}
+
+function addDay(){
+  var n=state.days.length+1;
+  state.days.push({id:uid(),title:'Ziua '+n,date:'',subtitle:'',collapsed:false,spots:[]});
+  render();
+}
+
+function editHero(field){state.editingHero=field;render()}
+function saveHero(field,val){
+  if(field==='name')state.tripName=toStr(val,80)||'Trip nou';
+  else if(field==='dates')state.dates=toStr(val,80);
+  else if(field==='hotel')state.hotel.name=toStr(val,100)||'Hotel';
+  state.editingHero=null;render();
+}
+
+function newTrip(){
+  if(!confirm('Creezi un trip nou? Datele curente se pierd.'))return;
+  try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+  state = createDefaultState();
+  render();
+}
+
+function showJsonHelp(){
+  state.showPrompt = true;
+  render();
+}
+
+function closePrompt(){
+  state.showPrompt = false;
+  render();
+}
+
+function copyPrompt(){
+  var text = getPromptText();
+  navigator.clipboard.writeText(text).then(function(){
+    var btn = document.getElementById('copy-prompt-btn');
+    if(btn){btn.textContent='✓ Copiat!';btn.classList.add('copied');setTimeout(function(){btn.textContent='📋 Copiază promptul';btn.classList.remove('copied')},2000)}
+  }).catch(function(){
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = getPromptText();
+    ta.style.cssText='position:fixed;top:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var btn = document.getElementById('copy-prompt-btn');
+    if(btn){btn.textContent='✓ Copiat!';btn.classList.add('copied');setTimeout(function(){btn.textContent='📋 Copiază promptul';btn.classList.remove('copied')},2000)}
+  });
+}
+
+function getPromptText(){
+  return 'Ești un trip planner expert. Ajută-mă să planific o călătorie și generează un JSON importabil în aplicația mea de Trip Planner.\n\n' +
+'## Informații despre călătorie\n\n' +
+'**Destinație:** [ex: Roma, Italia]\n' +
+'**Durate:** [ex: 3 zile, 15-17 Aprilie 2026]\n' +
+'**Aeroport sosire:** [ex: Fiumicino FCO]\n' +
+'**Ora aterizare:** [ex: 21 Martie, 08:00]\n' +
+'**Aeroport plecare:** [ex: Fiumicino FCO] (sau același)\n' +
+'**Ora zbor retur:** [ex: 23 Martie, 22:30]\n' +
+'**Cazare:** [ex: Hotel Colosseum Roma, lângă Colosseum]\n' +
+'**Adresa cazare (sau link Maps):** [ex: Via dei Fori Imperiali 12]\n' +
+'**Buget mâncare/zi:** [ex: €30-50]\n' +
+'**Stil de călătorie:** [ex: îmi place să mă plimb mult, nu mă interesează muzee, prefer street food]\n\n' +
+'## Obiective deja stabilite (opțional)\n' +
+'[Listează aici locurile pe care deja le-ai decis. Poți pune linkuri Google Maps, nume, sau chiar text copiat din research-ul tău. Exemple:]\n' +
+'- Colosseum (am bilet pe 16 Apr la 10:00)\n' +
+'- Trastevere seara pentru mâncare\n' +
+'- https://maps.app.goo.gl/xxxxx (link copiat din Maps)\n' +
+'- Vatican — dar nu vreau să intru, doar să văd din exterior\n\n' +
+'## Linkuri Google Maps cu locații salvate (opțional)\n' +
+'[Dacă ai o listă Google Maps sau locații salvate, pune linkurile aici. Pot fi:]\n' +
+'- Linkuri individuale: https://maps.app.goo.gl/xxxxx\n' +
+'- Sau descrie: "Am o listă pe Google Maps cu 12 locuri salvate în Roma"\n' +
+'- Sau pune screenshot-uri cu locațiile\n\n' +
+'## Ce vreau de la tine:\n' +
+'1. **Organizează** obiectivele mele + adaugă sugestii proprii într-un itinerariu pe zile, eficient geografic\n' +
+'2. **Găsește coordonatele GPS** (lat/lng) pentru fiecare locație\n' +
+'3. **Sugerează** viewpoints gratuite, hidden gems, restaurante locale bune\n' +
+'4. **Marchează** ce necesită rezervare\n' +
+'5. **Include** stațiile de transport relevante (aeroport ↔ hotel, stații de metrou cheie)\n' +
+'6. **Generează JSON-ul** în formatul de mai jos\n\n' +
+'## FORMAT JSON OBLIGATORIU:\n' +
+'```json\n' +
+'{\n' +
+'  "tripName": "Roma",\n' +
+'  "dates": "15 — 17 Aprilie 2026",\n' +
+'  "hotel": {\n' +
+'    "name": "Hotel Colosseum Roma",\n' +
+'    "lat": 41.8902,\n' +
+'    "lng": 12.4922\n' +
+'  },\n' +
+'  "transport": [\n' +
+'    {\n' +
+'      "name": "Fiumicino Airport (FCO)",\n' +
+'      "lat": 41.8003,\n' +
+'      "lng": 12.2389,\n' +
+'      "note": "Zbor sosire: 15 Apr 08:00 / Zbor retur: 17 Apr 22:30"\n' +
+'    },\n' +
+'    {\n' +
+'      "name": "Roma Termini",\n' +
+'      "lat": 41.9013,\n' +
+'      "lng": 12.5022,\n' +
+'      "note": "Gară centrală + metrou"\n' +
+'    }\n' +
+'  ],\n' +
+'  "days": [\n' +
+'    {\n' +
+'      "id": "d1",\n' +
+'      "title": "Ziua 1",\n' +
+'      "date": "Miercuri, 15 Aprilie",\n' +
+'      "subtitle": "Zona X → Zona Y → Zona Z",\n' +
+'      "collapsed": false,\n' +
+'      "spots": [\n' +
+'        {\n' +
+'          "id": "s1",\n' +
+'          "name": "Numele locației",\n' +
+'          "time": "10:00",\n' +
+'          "desc": "Descriere scurtă 1-2 propoziții.",\n' +
+'          "type": "sight",\n' +
+'          "lat": 41.8902,\n' +
+'          "lng": 12.4922,\n' +
+'          "visited": false,\n' +
+'          "appointment": "",\n' +
+'          "ticketUrl": "",\n' +
+'          "attachments": [],\n' +
+'          "tags": ["Iconic", "Gratis"],\n' +
+'          "mapsUrl": "https://maps.google.com/?q=41.8902,12.4922"\n' +
+'        }\n' +
+'      ]\n' +
+'    }\n' +
+'  ]\n' +
+'}\n' +
+'```\n\n' +
+'## Reguli pentru type:\n' +
+'- "sight" = obiectiv turistic, plimbare, clădire, monument\n' +
+'- "food" = restaurant, piață de mâncare, cafenea (prânz sau cină)\n' +
+'- "viewpoint" = punct panoramic, rooftop, terasă cu vedere\n' +
+'- "transport" = stație de tren/metrou/bus importantă\n\n' +
+'## Reguli pentru itinerariu:\n' +
+'- Organizează pe zone geografice (nu sări dintr-o parte în alta a orașului)\n' +
+'- 2 mese pe zi (prânz + cină), fără mic dejun\n' +
+'- Include ora aproximativă pentru fiecare oprire\n' +
+'- Adaugă "appointment" doar dacă e specificat explicit (ex: bilet la oră fixă)\n' +
+'- Adaugă "ticketUrl" cu link de cumpărare bilete unde e relevant\n' +
+'- "mapsUrl" = link Google Maps pentru fiecare locație (format: https://maps.google.com/?q=LAT,LNG)\n' +
+'- Include viewpoints gratuite (rooftop bars gratuite, dealuri, terase)\n' +
+'- Marchează cu tag "Rezervare!" ce necesită booking anticipat\n' +
+'- Fiecare id trebuie să fie unic (d1, d2... pentru zile, s1, s2... pentru spots)\n\n' +
+'## IMPORTANT:\n' +
+'- Returnează DOAR JSON-ul valid, fără explicații suplimentare\n' +
+'- JSON-ul trebuie să fie complet și gata de import (copy-paste într-un .json file)\n' +
+'- Nu pune comentarii în JSON (// nu e valid în JSON!)\n' +
+'- Asigură-te că coordonatele GPS sunt corecte\n' +
+'- Generează linkuri Google Maps funcționale';
+}
+
+function renderPromptModal(){
+  if(!state.showPrompt) return '';
+  return '<div class="modal-bg" onclick="closePrompt()"><div class="prompt-modal" onclick="event.stopPropagation()"><div class="prompt-header"><h3>Prompt pentru trip nou</h3><div class="prompt-header-btns"><button id="copy-prompt-btn" class="prompt-copy-btn" onclick="copyPrompt()">📋 Copiază promptul</button><button class="prompt-close-btn" onclick="closePrompt()">✕</button></div></div><div class="prompt-body"><pre>'+esc(getPromptText())+'</pre></div><div class="prompt-footer">Copiază → lipește într-o conversație nouă cu un AI → completează câmpurile [ex: ...] → importă JSON-ul generat</div></div></div>';
+}
+
+function exportData(){
+  var json=JSON.stringify({tripName:state.tripName,dates:state.dates,hotel:state.hotel,transport:state.transport,days:state.days},null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=state.tripName.toLowerCase().replace(/\s+/g,'-')+'-planner.json';
+  a.click();
+}
+
+function importData(ev){
+  var file=ev.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      applyImportedData(JSON.parse(e.target.result));
+      render();
+    }catch(err){alert('Fișier JSON invalid.')}
+  };
+  reader.readAsText(file);
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+// ===== MAPS =====
+function makePinHtml(type,label){
+  var c=COLORS[type]||COLORS.sight;
+  if(type==='viewpoint')return '<div class="pin-base pin-viewpoint" style="background:'+c+'"><span>'+(label||'')+'</span></div>';
+  if(type==='transport')return '<div class="pin-base pin-transport" style="background:'+c+'"><span>'+(label||'')+'</span></div>';
+  if(type==='hotel')return '<div class="pin-base pin-hotel" style="background:'+c+'">'+(label||'H')+'</div>';
+  if(type==='food')return '<div class="pin-base pin-food" style="background:'+c+'">'+(label||'')+'</div>';
+  return '<div class="pin-base pin-sight" style="background:'+c+'">'+(label||'')+'</div>';
+}
+
+function makeIcon(type,label){
+  var sz=type==='hotel'?[30,30]:(type==='viewpoint'?[22,22]:[26,26]);
+  return L.divIcon({className:'',html:makePinHtml(type,label),iconSize:sz,iconAnchor:[sz[0]/2,sz[1]/2]});
+}
+
+function popup(name,lat,lng,extra,mapsUrl){
+  var fallback = 'https://maps.google.com/?q='+encodeURIComponent(lat+','+lng);
+  var safeLink = sanitizeHttpUrl(mapsUrl) || fallback;
+  return '<strong>'+esc(name)+'</strong>'+(extra?'<br>'+esc(extra):'')+'<br><a href="'+esc(safeLink)+'" target="_blank" rel="noopener noreferrer" style="color:#1565c0;font-size:12px">Deschide în Google Maps →</a>';
+}
+
+function initAllMaps(){
+  // Destroy old maps
+  Object.keys(maps).forEach(function(k){if(maps[k]){maps[k].remove();delete maps[k]}});
+
+  // Master map
+  var mel=document.getElementById('master-map');
+  if(mel){
+    var mm=L.map('master-map',{scrollWheelZoom:true,attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mm);
+    maps['master']=mm;
+    var bounds=[];
+
+    // Hotel
+    if(state.hotel.lat){
+      L.marker([state.hotel.lat,state.hotel.lng],{icon:makeIcon('hotel','H'),zIndexOffset:2000}).bindPopup(popup(state.hotel.name,state.hotel.lat,state.hotel.lng,null,'https://maps.google.com/?q='+encodeURIComponent(state.hotel.name+' London'))).addTo(mm);
+      bounds.push([state.hotel.lat,state.hotel.lng]);
+    }
+    // Transport
+    state.transport.forEach(function(t){
+      L.marker([t.lat,t.lng],{icon:makeIcon('transport','T'),zIndexOffset:1500}).bindPopup(popup(t.name,t.lat,t.lng,t.note,'https://maps.google.com/?q='+encodeURIComponent(t.name+' London'))).addTo(mm);
+      bounds.push([t.lat,t.lng]);
+    });
+    // Days (filtered)
+    var flt = state.filter;
+    state.days.forEach(function(d,di){
+      var dayColor=DAY_COLORS[di%DAY_COLORS.length];
+      var line=[];
+      d.spots.forEach(function(s,si){
+        if(!s.lat)return;
+        if(flt && s.type!==flt)return; // skip filtered-out pins
+        L.marker([s.lat,s.lng],{icon:makeIcon(s.type,(si+1).toString())}).bindPopup(popup('Zi '+(di+1)+' / '+(si+1)+'. '+s.name,s.lat,s.lng,null,s.mapsUrl)).addTo(mm);
+        bounds.push([s.lat,s.lng]);
+        line.push([s.lat,s.lng]);
+      });
+      if(line.length>1 && !flt)L.polyline(line,{color:dayColor,weight:2,opacity:.4,dashArray:'6,8'}).addTo(mm);
+    });
+    if(bounds.length)mm.fitBounds(bounds,{padding:[35,35]});
+    else mm.setView([51.505,-0.09],12);
+  }
+
+  // Day maps
+  state.days.forEach(function(d,di){
+    if(d.collapsed)return;
+    var el=document.getElementById('day-map-'+di);
+    if(!el)return;
+    var dm=L.map('day-map-'+di,{scrollWheelZoom:true,attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(dm);
+    maps['day-'+di]=dm;
+
+    var dayColor=DAY_COLORS[di%DAY_COLORS.length];
+    var bounds=[];var line=[];
+
+    // Hotel
+    if(state.hotel.lat){
+      L.marker([state.hotel.lat,state.hotel.lng],{icon:makeIcon('hotel','H'),zIndexOffset:1000}).bindPopup(popup(state.hotel.name,state.hotel.lat,state.hotel.lng,null,'https://maps.google.com/?q='+encodeURIComponent(state.hotel.name+' London'))).addTo(dm);
+      bounds.push([state.hotel.lat,state.hotel.lng]);
+    }
+
+    d.spots.forEach(function(s,si){
+      if(!s.lat)return;
+      L.marker([s.lat,s.lng],{icon:makeIcon(s.type,(si+1).toString())}).bindPopup(popup((si+1)+'. '+s.name,s.lat,s.lng,null,s.mapsUrl)).addTo(dm);
+      bounds.push([s.lat,s.lng]);
+      line.push([s.lat,s.lng]);
+    });
+    if(line.length>1)L.polyline(line,{color:dayColor,weight:2.5,opacity:.5,dashArray:'8,8'}).addTo(dm);
+    if(bounds.length)dm.fitBounds(bounds,{padding:[30,30]});
+    else dm.setView([51.505,-0.09],12);
+  });
+}
+
+// ===== INIT =====
+render();
+</script>
+</body>
+</html>
